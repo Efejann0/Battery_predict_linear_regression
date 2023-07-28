@@ -22,9 +22,9 @@ def dbread():
     
     try:
     
-        cursor.execute("""SELECT yabby_kod, TO_CHAR(datalogged, 'YYYY-MM-DD') as datalogged, 
+        cursor.execute("""SELECT asset, TO_CHAR(datalogged, 'YYYY-MM-DD') as datalogged, 
                           battery FROM mind4machine.textracklocationcheck
-                          group by TO_CHAR(datalogged, 'YYYY-MM-DD'),yabby_kod,battery order by datalogged asc;""")
+                          group by TO_CHAR(datalogged, 'YYYY-MM-DD'),asset,battery order by datalogged asc;""")
         temp = cursor.fetchall()
         df = pd.DataFrame(temp)
         mapping = {df.columns[0]:'yabby_kod', df.columns[1]:'datalogged', df.columns[2]:'battery'}
