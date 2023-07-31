@@ -109,8 +109,8 @@ def battery_predict(data):
                 # Update the values for the next day
                 gun += 1
 
-            # If the battery life is 7 days or less, give a warning message
-            if gun <= 80:
+            # If the battery life is 10 days or less, give a warning message
+            if gun <= 10:
                 # print("Attention! The battery of Yabby {} will be 0 within {} days.".format(yabby, gun))
                 report += """
                                             <tr>
