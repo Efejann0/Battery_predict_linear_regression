@@ -5,8 +5,44 @@ import pandas as pd
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
+import sendemail as  sendemail
 
 def battery_predict(data):
+    report = """ <!DOCTYPE html><html><head>    <style>
+        .styled-table {{
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            min-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }}
+        .styled-table thead tr {{
+            background-color: #009879;
+            color: #ffffff;
+            text-align: left;
+        }}
+        .styled-table th,
+        .styled-table td {{
+            padding: 12px 15px;
+        }}
+        .styled-table tbody tr {{
+            border-bottom: 1px solid #dddddd;
+        }}
+        .styled-table tbody tr:nth-of-type(even) {{
+            background-color: #f3f3f3;
+        }}
+        .styled-table tbody tr:last-of-type {{
+            border-bottom: 2px solid #009879;
+        }}
+    </style></head><body>
+    <div class="container">
+        <table style="width:100%" class="styled-table">
+            <thead>
+                            <tr>
+                            <th>{}</th>
+                            <th>{}</th>
+                            </tr></thead><body>""".format('Yabby','Kalan Gün')
     # Load data into pandas dataframe
     df_all_yabby = pd.DataFrame(data)
     yabbys = list(set(df_all_yabby['yabby_kod']))
@@ -38,11 +74,11 @@ def battery_predict(data):
             regressor = LinearRegression()
 
             # Apply Time-Series cross-validation
-            tscv = TimeSeriesSplit(n_splits=5)
+            # tscv = TimeSeriesSplit(n_splits=5)
 
             # Evaluate the model using MSE
-            mse = make_scorer(mean_squared_error)
-            scores = cross_val_score(regressor, X, y, cv=tscv, scoring=mse)
+            # mse = make_scorer(mean_squared_error)
+            # scores = cross_val_score(regressor, X, y, cv=tscv, scoring=mse)
 
             # print("MSE scores for Yabby {}: {}".format(yabby, scores))
 
@@ -57,7 +93,7 @@ def battery_predict(data):
             gun = 0
             while True:
                 if gun > 365*20:  # 20 years
-                    print("Prediction for Yabby {} cannot exceed 20 years.".format(yabby))
+                    # print("Prediction for Yabby {} cannot exceed 20 years.".format(yabby))
                     break
 
                 tarih = baslangic_tarihi + datetime.timedelta(days=gun)
@@ -74,23 +110,36 @@ def battery_predict(data):
                 gun += 1
 
             # If the battery life is 7 days or less, give a warning message
-            if gun <= 7:
-                print("Attention! The battery of Yabby {} will be 0 within {} days.".format(yabby, gun))
+            if gun <= 80:
+                # print("Attention! The battery of Yabby {} will be 0 within {} days.".format(yabby, gun))
+                report += """
+                                            <tr>
+                                            <td >{}</td>
+                                            <td >{} günlük batarya ömrü kalmıştır.</td>
+                                            </tr>
+                                            """.format(yabby,gun)
+                
+                plt.plot(dates, predictions, label="{}".format(yabby))
             else:
-                print("The battery of Yabby {} will be 0 in {} days.".format(yabby,gun))
+                pass
+                # print("The battery of Yabby {} will be 0 in {} days.".format(yabby,gun))
 
             # Plotting
-            plt.plot(dates, predictions, label="{}".format(yabby))
+            # plt.plot(dates, predictions, label="{}".format(yabby))
 
         else:
-            print("There is not enough data for Yabby {}.".format(yabby))
-    
+            pass
+            # print("There is not enough data for Yabby {}.".format(yabby))
+
+    report += """ </tbody></table></div></body></html>"""
     # Setting the title, labels, and legend
     plt.title('Battery Predictions for all Yabbies')
     plt.xlabel('Date')
     plt.ylabel('Battery Life')
     plt.legend()
-    plt.show()
+    plt.savefig('yabby_predictions.png')
+    # plt.show()
+    sendemail.send_mail(report, 'yabby_predictions.png')
 
 
 # ------------------------ TEKER TEKER GRAFIK ---------------------------------------
@@ -101,6 +150,7 @@ def battery_predict(data):
 # import numpy as np
 # import datetime
 # import matplotlib.pyplot as plt
+# import sendemail as  sendemail
 
 # def battery_predict(data):
 #     # Load data into pandas dataframe
@@ -167,7 +217,8 @@ def battery_predict(data):
 
 #             # If the battery life is 7 days or less, give a warning message
 #             if gun <= 7:
-#                 print("Attention! The battery of Yabby {} will be 0 within {} days.".format(yabby, gun))
+#                 email = ("Attention! The battery of Yabby {} will be 0 within {} days.".format(yabby, gun))
+#                 sendemail.send_mail(email)
 #             else:
 #                 print("The battery of Yabby {} will be 0 in {} days.".format(yabby,gun))
 
